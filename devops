@@ -1,94 +1,325 @@
-Codeshare logo
-Expires in 24 hours  Save Codeshare ShareLog In
-Apologies we're having trouble with your connection. Reconnecting...
-284
-DOCKER MAVEN
-285
-​
-286
-docker build -t srustidr/mymavenapp2:version .
-287
-​
-288
-docker ps -aq | xargs docker stop
-289
-​
-290
-docker rm -f dockerserver
-291
-​
-292
-docker run -d --name dockerserver -p 8787:8080 srustidr/mymavenapp2:version
-293
-​
-294
-​
-295
-if permission denied
-296
+docker-compose.yml // FullstackApp1
+
+in 1st terminal
+
 cd /var/run
-297
 sudo chmod 777 docker.sock
-298
 sudo service docker restart
-299
+
+in 2nd terninal
+
+git clone " url of FullstackApp1.git"
+cd FullStackApp1/
+sudo docker-compose -f docker-compose_updated.yml up
+
+in browser localhost:3000/   // signup
+in browser localhost:8001/   // username: php_docker
+                                password: password
+see in php_docker  --> users
+
+
+---------------------------------------------------------------------------------------------------
+docker-compose_updated.yml
+
+
+
+version: '3'
+services:
+  www:
+
+    build:
+      context: .
+      dockerfile: Dockerfile_Web_App
+    container_name: www
+    ports:
+      - 3000:80
+      - 443:443 # for future ssl traffic
+  db:
+    image: mysql:latest
+    container_name: db
+    environment:
+      - MYSQL_DATABASE=php_docker
+      - MYSQL_USER=php_docker
+      - MYSQL_PASSWORD=password # this should live in a env var
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1 # equivalent to True
+    volumes:
+      - "./db:/docker-entrypoint-initdb.d" # this is how we persist a sql db even when container stops
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8001:80
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+-------------------------------------------------------------------------------------------------------------------------------------
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Git Lab 2ia
+
+git init
+git clone https://github.com/djgit17/MyMavenApp.git
+cd MyMAvenApp
+git branch branch1
+cd webapp
+nano index.jspgit 
+// change the name
+git add .
+git commit -m " changed the name in index.jsp"
+git status
+git checkout master
+git merge branch1
+touch Dockerfile 
+nano Dockerfile // write the content
+add
+commit
+git branch -M main
+git remote rm origin
+git remote add origin "url"
+git push -u origin main
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-300
-​
-301
-*************************************DOCKER VOLUME***********************************
-302
-sudo docker volume create myvolume
-303
-​
-304
-sudo docker volume ls
-305
-​
-306
-sudo docker inspect volume  myvolume
-307
-​
-308
-sudo docker run --name ubuntuvol1 -it  --mount source=myvolume,target=/app  ubuntu:latest
-309
-​
-310
-cd app
-311
- ls 
-312
- 
-313
- touch file1.txt
-314
- 
-315
- cat>>file1.txt
-316
-​
-317
-cat file1.tx
-318
-​
-319
-exit
-320
-​
-321
-sudo docker run --name centosvol3 -it  --mount source=myvolume,target=/app  centos:latest
-322
-​
-323
-cd app
-324
-​
-325
+BRANCHING
+create folder as branch
+git branch ftr1
+git branch ftr2
+git branch
+git checkout ftr1
+git graph
 ls
+vi index.html
+git add .
+git commit -m ""
+git graph
+git branch
+git checkout ftr1
+git status
+checkout ftr2
+vi index.html
+git commit -am ""
+git checkout master
+MERGING
+git checkout master
+gi dif master
+git merge ftr1
+git grapg
+cat master
+git branch --merge 
+git branch -d ftr1
+git branch -d fyr2
+git branch -D ftr2
+git graph
+STASH
+git text1.txt
+git checkout master
+git nano text1 // do somechanges
+git add
+git checkout stage //gives overwritten
+git stach
+git checkout stage
+git checkout master
+git stash list
+git nano text1// do again some changes
+git add or git commit -am "   "
+git stash
+git stash list
+git stash list-p  or git stash list apply
+git add.
+git commit -m ""
+cat text1.txt // to see changes
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+DEPLOYING JUNKINS USING DOCKER
+
+docker pull jenkins:2.60.3
+docker run -p 8087:8080 -p 50000:50000 -v jenkinsvol:/var/lib/test/jenkinsvol jenkins/jenkins
+
+to push to docker hub // for other
+docker login
+docker push username/imagename:tag
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+WORDPRESS
+
+mkdir wordpress
+cd wordpres
+sudo nano docker-compose.yml
+-----------------
+version: '3'
+
+services:
+   db:
+     image: mysql:5.7
+     volumes:
+       - db_data:/var/lib/mysql
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: somewordpress
+       MYSQL_DATABASE: wordpress
+       MYSQL_USER: wordpress
+       MYSQL_PASSWORD: wordpress
+
+   wordpress:
+     depends_on:
+       - db
+     image: wordpress:latest
+     ports:
+       - "8000:80" // change port 8000 to anyother
+     restart: always
+     environment:
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: wordpress
+       WORDPRESS_DB_PASSWORD: wordpress
+  volumes:
+    wordpress_files:
+    db_data:
+  ----------------------
+  
+  sudo docker-compose up --build -d
+
+browser---- 
+
+https://www.linode.com/docs/guides/wordpress-with-docker-compose/
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+DOCKER FILE FOR MAVEN
+
+FROM tomcat:9.0.82-jdk8-corretto-al2
+COPY ./target/MyMavenApp.war /usr/local/tomcat/webapps/MyMavenApp.war
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+MAVEN PIPELINE
+
+pipeline{
+    agent{
+        label "ubuntu"
+    }
+    tools{
+        maven "akshaymaven"
+    }
+    stages{
+        stage("Build"){
+            steps{
+            checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/AkshayaGireeshbhat/MyMavenApp.git']])
+            sh "mvn clean package"
+            }
+        }
+        stage("Build Image"){
+            steps{
+            
+            sh "docker build -t adoc007/testscript:v1 ."
+           
+            }
+        }
+        
+         stage("Build container"){
+            steps{
+                sh "docker ps -aq  | xargs docker stop"
+                sh "docker run -d -p 8084:8080 adoc007/testscript:v1 "
+            }
+        }   
+        stage("push image"){
+            steps{
+               withCredentials([string(credentialsId: 'adoc007', variable: 'dockerhub')]) {
+               sh "docker login -u adoc007 -p ${dockerhub}"
+               sh "docker push adoc007/testscript:v1"
+} 
+            }
+        }
+        
+             
+             
+         }
+         
+    }
 
 
-JOBS
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+DOCKER VOLUME
+
+Sudo apt-get install docker
+
+docker –version
+
+mkdir doc
+
+cd doc
+
+gedit index.html
+
+<!DOCTYPE html> <html> <body> <h1>My First Heading</h1> <p>My first paragraph.</p> </body> </html>
+
+gedit Dockerfile
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+FROM ubuntu:latest
+
+RUN apt-get update && apt-get install apache2 -y
+
+ADD . /var/www/html
+
+ENTRYPOINT apachectl -D FOREGROUND
+
+EXPOSE 80
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+sudo docker build -t web .
+
+sudo docker run -it -d -p 8087:80 --name sup1 web
+
+-----------------------------------------------------------------------------------------------------
+for attaching volume
+
+mkdir vol
+
+cd vol
+
+mkdir app
+
+sudo docker volume create myvol
+
+sudo docker volume ls
+
+sudo docker inspect volume myvol
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+DOCKER MAVEN
+
+docker build -t srustidr/mymavenapp2:version .
+
+docker ps -aq | xargs docker stop
+
+docker rm -f dockerserver
+
+docker run -d --name dockerserver -p 8787:8080 srustidr/mymavenapp2:version
 
 
+if permission denied
+cd /var/run
+sudo chmod 777 docker.sock
+sudo service docker restart
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Hide Ads
+*************************************DOCKER VOLUME***********************************
+sudo docker volume create myvolume
+
+sudo docker volume ls
+
+sudo docker inspect volume  myvolume
+
+sudo docker run --name ubuntuvol1 -it  --mount source=myvolume,target=/app  ubuntu:latest
+
+cd app
+ ls 
+ 
+ touch file1.txt
+ 
+ cat>>file1.txt
+
+cat file1.tx
+
+exit
+
+sudo docker run --name centosvol3 -it  --mount source=myvolume,target=/app  centos:latest
+
+cd app
+
+ls
