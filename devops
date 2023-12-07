@@ -1,0 +1,94 @@
+Codeshare logo
+Expires in 24 hours  Save Codeshare ShareLog In
+Apologies we're having trouble with your connection. Reconnecting...
+284
+DOCKER MAVEN
+285
+​
+286
+docker build -t srustidr/mymavenapp2:version .
+287
+​
+288
+docker ps -aq | xargs docker stop
+289
+​
+290
+docker rm -f dockerserver
+291
+​
+292
+docker run -d --name dockerserver -p 8787:8080 srustidr/mymavenapp2:version
+293
+​
+294
+​
+295
+if permission denied
+296
+cd /var/run
+297
+sudo chmod 777 docker.sock
+298
+sudo service docker restart
+299
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+300
+​
+301
+*************************************DOCKER VOLUME***********************************
+302
+sudo docker volume create myvolume
+303
+​
+304
+sudo docker volume ls
+305
+​
+306
+sudo docker inspect volume  myvolume
+307
+​
+308
+sudo docker run --name ubuntuvol1 -it  --mount source=myvolume,target=/app  ubuntu:latest
+309
+​
+310
+cd app
+311
+ ls 
+312
+ 
+313
+ touch file1.txt
+314
+ 
+315
+ cat>>file1.txt
+316
+​
+317
+cat file1.tx
+318
+​
+319
+exit
+320
+​
+321
+sudo docker run --name centosvol3 -it  --mount source=myvolume,target=/app  centos:latest
+322
+​
+323
+cd app
+324
+​
+325
+ls
+
+
+JOBS
+
+
+
+Hide Ads
